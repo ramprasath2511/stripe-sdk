@@ -26,26 +26,23 @@ class AddPaymentMethodScreen extends StatefulWidget {
   /// Custom Title for the screen
   final String title;
   static const String _defaultTitle = 'Add payment method';
-  final Text? headerText;
   final double? viewPadding;
-  final CardForm? form;
 
   static Route<String?> route(
-      {PaymentMethodStore? paymentMethodStore, Stripe? stripe, CardForm? form, String title = _defaultTitle,  Text? headerText,
+      {PaymentMethodStore? paymentMethodStore, Stripe? stripe, CardForm? form, String title = _defaultTitle,
         double? viewPadding}) {
     return MaterialPageRoute(
       builder: (context) => AddPaymentMethodScreen(
         paymentMethodStore: paymentMethodStore ?? PaymentMethodStore.instance,
         stripe: stripe ?? Stripe.instance,
-          form: form,
-        title: title, headerText: headerText,
+        title: title,
           viewPadding: viewPadding
       ),
     );
   }
 
   /// Add a payment method using a Stripe Setup Intent
-  AddPaymentMethodScreen({Key? key, required this.paymentMethodStore, required this.stripe, this.title = _defaultTitle, this.form, this.headerText, this.viewPadding})
+  AddPaymentMethodScreen({Key? key, required this.paymentMethodStore, required this.stripe, this.title = _defaultTitle, this.viewPadding})
       : super(key: key);
 
   @override
@@ -55,14 +52,10 @@ class AddPaymentMethodScreen extends StatefulWidget {
 class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
   Future<IntentClientSecret>? setupIntentFuture;
   final form = CardForm();
-  late final StripeCard _cardData;
-  late final GlobalKey<FormState> _formKey;
 
   @override
   void initState() {
     if (widget.createSetupIntent != null) setupIntentFuture = widget.createSetupIntent!();
-    /*_cardData = widget.form!.card;
-    _formKey = widget.form!.formKey;*/
     super.initState();
   }
 
@@ -70,8 +63,6 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: const Color(0xff223039),
-          foregroundColor: const Color(0xff223039),
           title: Text(widget.title),
           leading: IconButton(
             onPressed: () => {Navigator.maybePop(context)},
@@ -88,7 +79,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              widget.form!,
+              form,
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
