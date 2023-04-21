@@ -26,20 +26,26 @@ class AddPaymentMethodScreen extends StatefulWidget {
   /// Custom Title for the screen
   final String title;
   static const String _defaultTitle = 'Add payment method';
+  final Text? headerText;
+  final double? viewPadding;
+  final CardForm? form;
 
   static Route<String?> route(
-      {PaymentMethodStore? paymentMethodStore, Stripe? stripe, CardForm? form, String title = _defaultTitle}) {
+      {PaymentMethodStore? paymentMethodStore, Stripe? stripe, CardForm? form, String title = _defaultTitle,  Text? headerText,
+        double? viewPadding}) {
     return MaterialPageRoute(
       builder: (context) => AddPaymentMethodScreen(
         paymentMethodStore: paymentMethodStore ?? PaymentMethodStore.instance,
         stripe: stripe ?? Stripe.instance,
-        title: title,
+          form: form,
+        title: title, headerText: headerText,
+          viewPadding: viewPadding
       ),
     );
   }
 
   /// Add a payment method using a Stripe Setup Intent
-  AddPaymentMethodScreen({Key? key, required this.paymentMethodStore, required this.stripe, this.title = _defaultTitle})
+  AddPaymentMethodScreen({Key? key, required this.paymentMethodStore, required this.stripe, this.title = _defaultTitle, this.form, this.headerText, this.viewPadding})
       : super(key: key);
 
   @override
@@ -49,10 +55,14 @@ class AddPaymentMethodScreen extends StatefulWidget {
 class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
   Future<IntentClientSecret>? setupIntentFuture;
   final form = CardForm();
+  late final StripeCard _cardData;
+  late final GlobalKey<FormState> formKey;
 
   @override
   void initState() {
     if (widget.createSetupIntent != null) setupIntentFuture = widget.createSetupIntent!();
+    _cardData = widget.form!.card;
+    formKey = widget.form!.formKey;
     super.initState();
   }
 
@@ -60,24 +70,66 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: const Color(0xff223039),
+          foregroundColor: const Color(0xff223039),
           title: Text(widget.title),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.check),
-              onPressed: () async {
-                final formState = form.formKey.currentState;
-                if (formState?.validate() ?? false) {
-                  formState!.save();
-                  await _tryCreatePaymentMethod(context, form.card);
-                }
-              },
-            )
-          ],
+          leading: IconButton(
+            onPressed: () => {Navigator.maybePop(context)},
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            ),
+          ),
         ),
-        body: SingleChildScrollView(
+        body: Container(
+          height: MediaQuery.of(context).size.height,
+          padding: EdgeInsets.symmetric(horizontal: widget.viewPadding!),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              form,
+              widget.form!,
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 25),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints.tightFor(
+                        width: MediaQuery.of(context).size.width, height: 50),
+                    child: ElevatedButton(
+                      child: const Text(
+                        'Add Card',
+                        style: TextStyle(
+                            color: Color(0xffffffff),
+                            // fontFamily: headingText,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18),
+                      ),
+                      style: ButtonStyle(
+                        foregroundColor:
+                        MaterialStateProperty.all<Color>(Color(0xff223039)),
+                        backgroundColor:
+                        MaterialStateProperty.all<Color>(Color(0xff223039)),
+                        shape:
+                        MaterialStateProperty.all<RoundedRectangleBorder>(
+                            const RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.all(Radius.circular(10)),
+                                side:
+                                BorderSide(color: Colors.transparent))),
+                      ),
+                      onPressed: () async {
+                        final formState = form.formKey.currentState;
+                        if (formState?.validate() ?? false) {
+                          formState!.save();
+                          await _tryCreatePaymentMethod(context, _cardData);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+
               if (StripeUiOptions.showTestPaymentMethods)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -96,7 +148,9 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
                 )
             ],
           ),
-        ));
+        ),
+
+                    );
   }
 
   Widget _createTestCardButton(String number) {
