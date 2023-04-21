@@ -190,7 +190,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
         if (confirmedSetupIntent['status'] == 'succeeded') {
           debugPrint("success");
           /// A new payment method has been attached, so refresh the store.
-          await widget.paymentMethodStore.refresh();
+         // await widget.paymentMethodStore.refresh();
           hideProgressDialog(context);
           SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
             Navigator.pop(context, paymentMethod['id']);
