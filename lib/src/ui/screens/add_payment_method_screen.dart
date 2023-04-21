@@ -56,13 +56,13 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
   Future<IntentClientSecret>? setupIntentFuture;
   final form = CardForm();
   late final StripeCard _cardData;
-  late final GlobalKey<FormState> formKey;
+  late final GlobalKey<FormState> _formKey;
 
   @override
   void initState() {
     if (widget.createSetupIntent != null) setupIntentFuture = widget.createSetupIntent!();
     _cardData = widget.form!.card;
-    formKey = widget.form!.formKey;
+    _formKey = widget.form!.formKey;
     super.initState();
   }
 
@@ -122,7 +122,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
                         final formState = form.formKey.currentState;
                         if (formState?.validate() ?? false) {
                           formState!.save();
-                          await _tryCreatePaymentMethod(context, _cardData);
+                          await _tryCreatePaymentMethod(context, form.card);
                         }
                       },
                     ),
