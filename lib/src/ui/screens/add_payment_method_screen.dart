@@ -27,6 +27,7 @@ class AddPaymentMethodScreen extends StatefulWidget {
   final String title;
   static const String _defaultTitle = 'Add payment method';
   final double? viewPadding;
+  final CardForm? form;
 
   static Route<String?> route(
       {PaymentMethodStore? paymentMethodStore, Stripe? stripe, CardForm? form, String title = _defaultTitle,
@@ -36,13 +37,14 @@ class AddPaymentMethodScreen extends StatefulWidget {
         paymentMethodStore: paymentMethodStore ?? PaymentMethodStore.instance,
         stripe: stripe ?? Stripe.instance,
         title: title,
-          viewPadding: viewPadding
+          viewPadding: viewPadding,
+          form: form
       ),
     );
   }
 
   /// Add a payment method using a Stripe Setup Intent
-  AddPaymentMethodScreen({Key? key, required this.paymentMethodStore, required this.stripe, this.title = _defaultTitle, this.viewPadding})
+  AddPaymentMethodScreen({Key? key, required this.paymentMethodStore, required this.stripe, this.title = _defaultTitle, this.viewPadding, this.form})
       : super(key: key);
 
   @override
@@ -51,11 +53,12 @@ class AddPaymentMethodScreen extends StatefulWidget {
 
 class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
   Future<IntentClientSecret>? setupIntentFuture;
-  final form = CardForm();
+  CardForm form = CardForm();
 
   @override
   void initState() {
     if (widget.createSetupIntent != null) setupIntentFuture = widget.createSetupIntent!();
+    form = widget.form!;
     super.initState();
   }
 
