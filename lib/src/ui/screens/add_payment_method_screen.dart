@@ -61,8 +61,8 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
   @override
   void initState() {
     if (widget.createSetupIntent != null) setupIntentFuture = widget.createSetupIntent!();
-    _cardData = widget.form!.card;
-    _formKey = widget.form!.formKey;
+    /*_cardData = widget.form!.card;
+    _formKey = widget.form!.formKey;*/
     super.initState();
   }
 
