@@ -185,19 +185,13 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
       try {
         final confirmedSetupIntent = await widget.stripe
             .confirmSetupIntent(initialSetupIntent.clientSecret, paymentMethod['id'], context: context);
-        debugPrint(confirmedSetupIntent.values.length.toString());
-        debugPrint(confirmedSetupIntent['status']);
         if (confirmedSetupIntent['status'] == 'succeeded') {
-          debugPrint("success");
           /// A new payment method has been attached, so refresh the store.
-         // await widget.paymentMethodStore.refresh();
+          await widget.paymentMethodStore.refresh();
           hideProgressDialog(context);
-          SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-            Navigator.pop(context, paymentMethod['id']);
-          });
+          Navigator.pop(context, jsonEncode(paymentMethod));
           return;
         } else {
-          debugPrint(" no success");
           Map<String, dynamic> errorData = {
             'error': true,
             'message': 'Authentication failed'
@@ -206,11 +200,10 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text("Authentication failed, please try again.")));
         }
-      } on Exception catch (e) {
+      }  catch (e) {
         SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
           Navigator.maybePop(context, false);
         });
-        debugPrint("data------3");
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
       }
