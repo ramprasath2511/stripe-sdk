@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:stripe_sdk/src/ui/stores/payment_method_store.dart';
 
 import '../../models/card.dart';
@@ -165,28 +167,53 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
   }
 
   Future<void> _createPaymentMethod(StripeCard cardData, BuildContext context) async {
-    var paymentMethod = await widget.stripe.api.createPaymentMethodFromCard(cardData);
+    showProgressDialog(context);
+    var paymentMethod;
+    try {
+      paymentMethod = await widget.stripe.api.createPaymentMethodFromCard(cardData);
+    } on Exception catch (e) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        Navigator.maybePop(context, false);
+      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+      debugPrint(e.toString());
+    }
     if (setupIntentFuture != null) {
       final initialSetupIntent =
           await setupIntentFuture!.timeout(const Duration(seconds: 10)).whenComplete(() => hideProgressDialog(context));
-      final confirmedSetupIntent = await widget.stripe
-          .confirmSetupIntent(initialSetupIntent.clientSecret, paymentMethod['id'], context: context);
-
-      if (confirmedSetupIntent['status'] == 'succeeded') {
-        /// A new payment method has been attached, so refresh the store.
-        await widget.paymentMethodStore.refresh();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Payment method successfully added."),
-        ));
-        Navigator.pop(context, paymentMethod['id']);
-      } else {
+      try {
+        final confirmedSetupIntent = await widget.stripe
+            .confirmSetupIntent(initialSetupIntent.clientSecret, paymentMethod['id'], context: context);
+        
+        if (confirmedSetupIntent['status'] == 'succeeded') {
+          /// A new payment method has been attached, so refresh the store.
+          await widget.paymentMethodStore.refresh();
+          hideProgressDialog(context);
+          SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+            Navigator.pop(context, jsonEncode(paymentMethod));
+          });
+          return;
+        } else {
+          Map<String, dynamic> errorData = {
+            'error': true,
+            'message': 'Authentication failed'
+          };
+          Navigator.pop(context, errorData);
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text("Authentication failed, please try again.")));
+        }
+      } on Exception catch (e) {
+        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+          Navigator.maybePop(context, false);
+        });
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text("Authentication failed, please try again.")));
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
-    } else {
+    } /*else {
       paymentMethod = await (widget.paymentMethodStore.attachPaymentMethod(paymentMethod['id']))
           .whenComplete(() => hideProgressDialog(context));
       Navigator.pop(context, paymentMethod['id']);
-    }
+    }*/
   }
 }
