@@ -118,7 +118,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
                         final formState = form.formKey.currentState;
                         if (formState?.validate() ?? false) {
                           formState!.save();
-                          await _createPaymentMethod(form.card, context);
+                          await _tryCreatePaymentMethod(context, form.card);
                         }
                       },
                     ),
@@ -162,6 +162,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
     try {
       await _createPaymentMethod(cardData, context);
     } catch (e) {
+      debugPrint("data------0");
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
@@ -175,6 +176,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         Navigator.maybePop(context, false);
       });
+      debugPrint("data------1");
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(e.toString())));
       debugPrint(e.toString());
@@ -191,7 +193,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
           await widget.paymentMethodStore.refresh();
           hideProgressDialog(context);
           SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-            Navigator.pop(context, jsonEncode(paymentMethod));
+            Navigator.pop(context, paymentMethod['id']);
           });
           return;
         } else {
@@ -200,6 +202,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
             'message': 'Authentication failed'
           };
           Navigator.pop(context, errorData);
+          debugPrint("data------2");
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text("Authentication failed, please try again.")));
         }
@@ -207,6 +210,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
         SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
           Navigator.maybePop(context, false);
         });
+        debugPrint("data------3");
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
       }
