@@ -188,7 +188,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
         if (confirmedSetupIntent['status'] == 'succeeded') {
           debugPrint("1");
           /// A new payment method has been attached, so refresh the store.
-          await widget.paymentMethodStore.refresh();
+         // await widget.paymentMethodStore.refresh();
           debugPrint("2");
           hideProgressDialog(context);
           debugPrint("3");
