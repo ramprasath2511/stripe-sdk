@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../stripe_sdk_ui.dart';
 
@@ -80,7 +81,7 @@ class _PaymentMethodSelectorState extends State<PaymentMethodSelector> {
             OutlinedButton(
                 onPressed: () async {
                   final id = await Navigator.push(
-                      context, AddPaymentMethodScreen.route(paymentMethodStore: widget._paymentMethodStore));
+                      context, AddPaymentMethodScreen.route(paymentMethodStore: widget._paymentMethodStore, viewPadding: 5.w));
                   if (id != null) {
                     await widget._paymentMethodStore.refresh();
                     setState(() {

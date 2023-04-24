@@ -21,6 +21,7 @@ dependencies:
   collection: ^1.16.0
   webview_flutter: ^3.0.4
   universal_html: ^2.0.8
+  sizer: 2.0.15
 
 
 dev_dependencies:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../stripe.dart';
 import '../../ui/stores/payment_method_store.dart';
@@ -34,7 +35,7 @@ class PaymentMethodsScreen extends StatelessWidget {
             icon: const Icon(Icons.add),
             onPressed: () async {
               await Navigator.push(
-                  context, AddPaymentMethodScreen.route(paymentMethodStore: _paymentMethodStore, stripe: stripe));
+                  context, AddPaymentMethodScreen.route(paymentMethodStore: _paymentMethodStore, stripe: stripe, viewPadding: 5.w));
             },
           )
         ],

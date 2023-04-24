@@ -28,12 +28,12 @@ class AddPaymentMethodScreen extends StatefulWidget {
   /// Custom Title for the screen
   final String title;
   static const String _defaultTitle = 'Add payment method';
-  final double? viewPadding;
+  final double viewPadding;
   final CardForm? form;
 
   static Route<String?> route(
       {PaymentMethodStore? paymentMethodStore, Stripe? stripe, CardForm? form, String title = _defaultTitle,
-        double? viewPadding}) {
+        required double viewPadding}) {
     return MaterialPageRoute(
       builder: (context) => AddPaymentMethodScreen(
         paymentMethodStore: paymentMethodStore ?? PaymentMethodStore.instance,
@@ -46,7 +46,7 @@ class AddPaymentMethodScreen extends StatefulWidget {
   }
 
   /// Add a payment method using a Stripe Setup Intent
-  AddPaymentMethodScreen({Key? key, required this.paymentMethodStore, required this.stripe, this.title = _defaultTitle, this.viewPadding, this.form})
+  AddPaymentMethodScreen({Key? key, required this.paymentMethodStore, required this.stripe, this.title = _defaultTitle, required this.viewPadding, this.form})
       : super(key: key);
 
   @override
@@ -79,7 +79,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
         ),
         body: Container(
           height: MediaQuery.of(context).size.height,
-          padding: EdgeInsets.symmetric(horizontal: widget.viewPadding!),
+          padding: EdgeInsets.symmetric(horizontal: widget.viewPadding),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -186,35 +186,26 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
         final confirmedSetupIntent = await widget.stripe
             .confirmSetupIntent(initialSetupIntent.clientSecret, paymentMethod['id'], context: context);
         if (confirmedSetupIntent['status'] == 'succeeded') {
-          debugPrint("1");
           /// A new payment method has been attached, so refresh the store.
          // await widget.paymentMethodStore.refresh();
-          debugPrint("2");
           hideProgressDialog(context);
-          debugPrint("3");
           Navigator.pop(context, jsonEncode(paymentMethod));
-          debugPrint("4");
           return;
         } else {
           Map<String, dynamic> errorData = {
             'error': true,
             'message': 'Authentication failed'
           };
-          debugPrint("5");
           Navigator.pop(context, errorData);
-          debugPrint("6");
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text("Authentication failed, please try again.")));
         }
       }  catch (e) {
-        debugPrint("7");
         SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
           Navigator.maybePop(context, false);
         });
-        debugPrint("ena errr9r da please ");
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString())));
-        debugPrint("ena errr9r ");
       }
     } else {
       paymentMethod = await (widget.paymentMethodStore.attachPaymentMethod(paymentMethod['id']))
