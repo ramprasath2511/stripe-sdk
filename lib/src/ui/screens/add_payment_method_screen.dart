@@ -189,7 +189,9 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
           /// A new payment method has been attached, so refresh the store.
           await widget.paymentMethodStore.refresh();
           hideProgressDialog(context);
+          debugPrint(jsonEncode(paymentMethod));
           Navigator.pop(context, jsonEncode(paymentMethod));
+          debugPrint(jsonEncode(paymentMethod));
           return;
         } else {
           Map<String, dynamic> errorData = {
@@ -201,6 +203,7 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
               .showSnackBar(const SnackBar(content: Text("Authentication failed, please try again.")));
         }
       }  catch (e) {
+        Navigator.pop(context);
         SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
           Navigator.maybePop(context, false);
         });
