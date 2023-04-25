@@ -189,7 +189,9 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
           /// A new payment method has been attached, so refresh the store.
          // await widget.paymentMethodStore.refresh();
           hideProgressDialog(context);
-          Navigator.pop(context, jsonEncode(paymentMethod));
+          SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+            Navigator.pop(context, jsonEncode(paymentMethod));
+          });
           return;
         } else {
           Map<String, dynamic> errorData = {
@@ -210,7 +212,9 @@ class _AddPaymentMethodScreenState extends State<AddPaymentMethodScreen> {
     } else {
       paymentMethod = await (widget.paymentMethodStore.attachPaymentMethod(paymentMethod['id']))
           .whenComplete(() => hideProgressDialog(context));
-      Navigator.pop(context, paymentMethod['id']);
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        Navigator.pop(context, jsonEncode(paymentMethod));
+      });
     }
   }
 }
